@@ -1,0 +1,27 @@
+{
+    "name": "oremis/atlas",
+    "description": "OREMIS Single Sign-On package (Google + PIO Identity)",
+    "type": "library",
+    "license": "AGPL-3.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "Oremis\\Atlas\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Oremis\\Atlas\\AtlasServiceProvider"
+            ],
+            "aliases": {
+                "Atlas": "Oremis\\Atlas\\Facades\\Atlas"
+            }
+        }
+    },
+    "require": {
+        "php": ">=8.1",
+        "illuminate/support": "^10.0|^11.0|^12.0",
+        "illuminate/http": "^10.0|^11.0|^12.0",
+        "laravel/socialite": "^5.8|^6.0"
+    }
+}
