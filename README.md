@@ -1,4 +1,4 @@
-# Oremis Atlas
+# OREMIS Atlas
 
 Atlas is a Laravel package that provides Single Sign-On (SSO) for OREMIS projects by combining Google OAuth (via Socialite) with the PIO Identity service. It handles fetching the PIO profile, synchronizing a local user record, and enforcing account status via middleware.
 
