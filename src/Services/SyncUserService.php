@@ -51,6 +51,8 @@ class SyncUserService
                 'staff_positions'   => $profile['staff_positions'] ?? [],
                 'departments'       => $profile['departments'] ?? [],
                 'department_teams'  => $profile['department_teams'] ?? [],
+                'is_supervisor'      => $profile['is_supervisor'] ?? ($user->is_supervisor ?? false),
+                'is_certified_examiner' => $profile['is_certified_examiner'] ?? ($user->is_certified_examiner ?? false),
             ],
             'last_login_at' => Carbon::now(),
         ];
