@@ -1,5 +1,10 @@
 <?php
 
+$allowedRedirectHosts = array_filter(array_map('trim', explode(
+    ',',
+    env('ATLAS_ALLOWED_REDIRECT_HOSTS', '')
+)));
+
 return [
 
     /*
@@ -38,6 +43,7 @@ return [
 
     'redirect_after_login' => '/',
     'redirect_after_logout' => '/',
+    'allowed_redirect_hosts' => $allowedRedirectHosts ?: ['*.oremis.fr'], // hosts allowed for absolute redirect_to URLs
 
     /*
     |--------------------------------------------------------------------------

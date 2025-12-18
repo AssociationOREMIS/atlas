@@ -37,7 +37,7 @@ class AtlasService
          */
         $intended = request()->get('redirect_to');
 
-        if ($intended && str_starts_with($intended, '/') && !str_contains($intended, '/auth/')) {
+        if ($intended && $this->isAllowedRedirectTarget($intended)) {
             cookie()->queue(cookie('atlas_intended', $intended, 15)); // 15 min
         }
 
@@ -99,5 +99,83 @@ class AtlasService
         session()->regenerateToken();
 
         return redirect(config('atlas.redirect_after_logout', '/'));
+    }
+
+    /**
+     * Ensure redirect targets are safe (relative paths or approved hosts).
+     */
+    private function isAllowedRedirectTarget(string $url): bool
+    {
+        if (str_starts_with($url, '/') && !str_contains($url, '/auth/')) {
+            return true;
+        }
+
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return false;
+        }
+
+        $parts = parse_url($url);
+        $host = $parts['host'] ?? null;
+        $path = $parts['path'] ?? '';
+        $scheme = $parts['scheme'] ?? null;
+
+        if (!$host || !in_array($scheme, ['http', 'https'], true)) {
+            return false;
+        }
+
+        if (str_contains($path, '/auth/')) {
+            return false;
+        }
+
+        $allowedHosts = array_filter(array_map(
+            'strtolower',
+            (array) config('atlas.allowed_redirect_hosts', [])
+        ));
+
+        if (empty($allowedHosts)) {
+            return false;
+        }
+
+        foreach ($allowedHosts as $allowedHost) {
+            if ($this->hostMatches($host, $allowedHost)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if a host matches a configured host or wildcard entry.
+     */
+    private function hostMatches(string $host, string $allowed): bool
+    {
+        $host = strtolower($host);
+        $allowed = strtolower($allowed);
+
+        if ($allowed === '*') {
+            return true;
+        }
+
+        if (str_starts_with($allowed, '*.')) {
+            $allowed = substr($allowed, 2);
+            return $allowed ? $this->hostMatchesBase($host, $allowed) : false;
+        }
+
+        if (str_starts_with($allowed, '.')) {
+            $allowed = ltrim($allowed, '.');
+            return $allowed ? $this->hostMatchesBase($host, $allowed) : false;
+        }
+
+        return $host === $allowed;
+    }
+
+    private function hostMatchesBase(string $host, string $base): bool
+    {
+        if ($host === $base) {
+            return true;
+        }
+
+        return str_ends_with($host, '.' . $base);
     }
 }

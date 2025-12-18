@@ -33,6 +33,7 @@ Key options in `config/atlas.php`:
 - `guard` : Auth guard to use (default `web`).
 - `google_params` : Extra Google OAuth params applied on login (e.g. `hd`, `prompt`).
 - `redirect_after_login` / `redirect_after_logout` : Redirect targets.
+- `allowed_redirect_hosts` : Hostnames allowed when `redirect_to` contains an absolute URL (defaults to `*.oremis.fr`).
 - `user_model` : The Eloquent user model class.
 - `status_field` : Column name used to check user status (default `status`).
 - `suspended_values` : Array of statuses considered blocked (default `['suspended', 'inactive']`).
@@ -47,11 +48,17 @@ Add the Google credentials and (optionally) override PIO settings in your `.env`
 ATLAS_PIO_URL=https://pio.oremis.fr
 ATLAS_PIO_ME_ENDPOINT=/api/me
 
+# Optional: allow absolute redirect_to URLs for these hosts (comma separated)
+# Defaults to *.oremis.fr if omitted.
+ATLAS_ALLOWED_REDIRECT_HOSTS=test.oremis.fr,app.oremis.fr
+
 # Google Socialite (if you don't set these, the package will try to merge them):
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 GOOGLE_REDIRECT_URL=https://your-app.com/auth/callback
 ```
+
+Use patterns like `*.oremis.fr` or `.oremis.fr` to allow every subdomain of `oremis.fr`.
 
 You can also add values to `config/services.php` under `google` (the package will not override existing keys):
 
@@ -109,7 +116,7 @@ Route::post('/logout', fn() => Atlas::logout())->name('logout');
 
 Notes on behavior:
 
-- `Atlas::login()` redirects to Google's OAuth page and accepts an optional `?redirect_to=/path` parameter that is stored in a short-lived cookie (15 min) so the user returns to the requested page after login.
+- `Atlas::login()` redirects to Google's OAuth page and accepts an optional `?redirect_to=/path` parameter that is stored in a short-lived cookie (15 min) so the user returns to the requested page after login. Absolute URLs are also accepted as long as their host is listed in `config('atlas.allowed_redirect_hosts')` (or `ATLAS_ALLOWED_REDIRECT_HOSTS`). By default anything under `*.oremis.fr` is allowed.
 - `Atlas::callback()` exchanges the Google token with PIO using `/api/me`, synchronizes (or creates) the local user via `SyncUserService`, and logs them in. If the user is not `active`, the callback will redirect with an error.
 - `Atlas::logout()` logs out via the configured guard and redirects to `redirect_after_logout`.
 
