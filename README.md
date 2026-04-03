@@ -2,7 +2,7 @@
 
 Atlas is a Laravel package that provides Single Sign-On (SSO) for OREMIS projects by combining Google OAuth (via Socialite) with the PIO Identity service. It handles fetching the PIO profile, synchronizing a local user record, and enforcing account status via middleware.
 
-**Supported:** PHP >= 8.1, Laravel 10.x, 11.x, 12.x
+**Supported:** PHP >= 8.1, Laravel 10.x, 11.x, 12.x, 13.x
 
 ## Installation
 
@@ -124,7 +124,7 @@ Notes on behavior:
 
 Register `\Oremis\Atlas\Middleware\CheckUserStatus` in your `app/Http/Kernel.php` as a route or global middleware depending on your needs. The middleware caches the user's status (configurable TTL) and logs them out if their status is in `suspended_values`.
 
-### Laravel 11 & 12
+### Laravel 11, 12 & 13
 
 In `bootstrap/app.php`:
 
