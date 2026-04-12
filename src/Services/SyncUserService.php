@@ -12,6 +12,38 @@ class SyncUserService
     public function sync(array $profile, $googleUser)
     {
         $model = config('atlas.user_model');
+        $seniority = $profile['seniority'] ?? null;
+        $qualification = $profile['qualification'] ?? null;
+
+        $seniorityFormatted = null;
+        if (
+            is_array($seniority)
+            && isset($seniority['years'], $seniority['months'], $seniority['days'])
+        ) {
+            $seniorityFormatted = sprintf(
+                '%d ans, %d mois, %d jours',
+                $seniority['years'],
+                $seniority['months'],
+                $seniority['days']
+            );
+        }
+
+        $qualificationData = null;
+        if (is_array($qualification)) {
+            $qualificationData = [
+                'id' => $qualification['id'] ?? null,
+                'code' => $qualification['code'] ?? null,
+                'name' => $qualification['name'] ?? null,
+                'order' => $qualification['order'] ?? null,
+            ];
+        } elseif (is_object($qualification)) {
+            $qualificationData = [
+                'id' => $qualification->id ?? null,
+                'code' => $qualification->code ?? null,
+                'name' => $qualification->name ?? null,
+                'order' => $qualification->order ?? null,
+            ];
+        }
 
         // the most important identity
         $cib = $profile['cib'] ?? null;
@@ -54,6 +86,10 @@ class SyncUserService
                 'is_supervisor'      => $profile['is_supervisor'] ?? ($user->is_supervisor ?? false),
                 'is_certified_examiner' => $profile['is_certified_examiner'] ?? ($user->is_certified_examiner ?? false),
                 'is_social_officer' => $profile['is_social_officer'] ?? ($user->is_social_officer ?? false),
+                'seniority' => $seniority,
+                'seniority_formatted' => $seniorityFormatted,
+                'qualification_id' => $profile['qualification_id'] ?? ($qualificationData['id'] ?? null),
+                'qualification' => $qualificationData,
             ],
             'last_login_at' => Carbon::now(),
         ];
